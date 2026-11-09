@@ -1,5 +1,9 @@
 import React, { useState } from 'react';
-import { FLUTTER_PROJECT_FILES, FlutterFile } from '../data/flutterCodeSnippets';
+import {
+  FLUTTER_PROJECT_FILES,
+  FlutterFile,
+  downloadFlutterProjectZip,
+} from '../data/flutterCodeSnippets';
 import { soundService } from '../services/soundService';
 import {
   X,
@@ -7,9 +11,9 @@ import {
   Check,
   FileCode,
   Terminal,
-  Layers,
   Sparkles,
   Download,
+  FolderArchive,
 } from 'lucide-react';
 
 interface FlutterCodeInspectorProps {
@@ -23,10 +27,12 @@ export const FlutterCodeInspector: React.FC<FlutterCodeInspectorProps> = ({
 }) => {
   const [activeFileIndex, setActiveFileIndex] = useState(0);
   const [copied, setCopied] = useState(false);
+  const [downloadingZip, setDownloadingZip] = useState(false);
 
   if (!isOpen) return null;
 
-  const currentFile: FlutterFile = FLUTTER_PROJECT_FILES[activeFileIndex] || FLUTTER_PROJECT_FILES[0];
+  const currentFile: FlutterFile =
+    FLUTTER_PROJECT_FILES[activeFileIndex] || FLUTTER_PROJECT_FILES[0];
 
   const handleCopy = () => {
     soundService.playTap();
@@ -35,9 +41,11 @@ export const FlutterCodeInspector: React.FC<FlutterCodeInspectorProps> = ({
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleDownloadAll = () => {
+  const handleDownloadSingleFile = () => {
     soundService.playSuccess();
-    const blob = new Blob([currentFile.content], { type: 'text/plain;charset=utf-8' });
+    const blob = new Blob([currentFile.content], {
+      type: 'text/plain;charset=utf-8',
+    });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
@@ -46,11 +54,21 @@ export const FlutterCodeInspector: React.FC<FlutterCodeInspectorProps> = ({
     URL.revokeObjectURL(url);
   };
 
+  const handleDownloadFullProjectZip = async () => {
+    soundService.playCelebration();
+    setDownloadingZip(true);
+    try {
+      await downloadFlutterProjectZip();
+    } finally {
+      setDownloadingZip(false);
+    }
+  };
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="bg-slate-900 border border-slate-700/80 rounded-3xl w-full max-w-4xl h-[90vh] flex flex-col shadow-2xl overflow-hidden text-slate-100">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-950/85 backdrop-blur-md animate-in fade-in duration-200">
+      <div className="bg-slate-900 border border-slate-700/80 rounded-3xl w-full max-w-5xl h-[90vh] flex flex-col shadow-2xl overflow-hidden text-slate-100">
         {/* Modal Header */}
-        <div className="flex items-center justify-between px-5 py-3.5 border-b border-slate-800 bg-slate-950/50">
+        <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-3.5 border-b border-slate-800 bg-slate-950/60">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl bg-blue-600 text-white flex items-center justify-center text-lg font-black shadow-md">
               ⚡
@@ -58,27 +76,42 @@ export const FlutterCodeInspector: React.FC<FlutterCodeInspectorProps> = ({
             <div>
               <div className="flex items-center gap-2">
                 <h2 className="text-sm font-black text-white">
-                  كود تطبيق فلاتر (Flutter Architecture & Source Code)
+                  مشروع فلاتر الكامل (Flutter Project — {FLUTTER_PROJECT_FILES.length} ملفات)
                 </h2>
                 <span className="text-[10px] font-bold bg-cyan-950 text-cyan-300 border border-cyan-800 px-2 py-0.5 rounded-full">
-                  Flutter 3.x + Material 3
+                  Flutter 3.x + Riverpod + Material 3
                 </span>
               </div>
               <p className="text-[11px] text-slate-400">
-                من إعداد كبير مهندسي فلاتر (Senior Flutter Developer)
+                جميع الملفات موجودة فعلياً في مجلد المشروع (lib/, pubspec.yaml, test/) وجاهزة للتشغيل
               </p>
             </div>
           </div>
 
-          <button
-            onClick={() => {
-              soundService.playTap();
-              onClose();
-            }}
-            className="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 flex items-center justify-center text-slate-300 hover:text-white transition-colors"
-          >
-            <X className="w-4 h-4" />
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleDownloadFullProjectZip}
+              disabled={downloadingZip}
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black transition-colors shadow-md cursor-pointer disabled:opacity-50"
+            >
+              <FolderArchive className="w-4 h-4" />
+              <span>
+                {downloadingZip
+                  ? 'جاري تجهيز الملف...'
+                  : 'تحميل مشروع Flutter كامل (.ZIP)'}
+              </span>
+            </button>
+
+            <button
+              onClick={() => {
+                soundService.playTap();
+                onClose();
+              }}
+              className="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 flex items-center justify-center text-slate-300 hover:text-white transition-colors cursor-pointer"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
         </div>
 
         {/* File Tabs Bar */}
@@ -92,14 +125,14 @@ export const FlutterCodeInspector: React.FC<FlutterCodeInspectorProps> = ({
                   soundService.playTap();
                   setActiveFileIndex(idx);
                 }}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-mono font-medium whitespace-nowrap transition-all ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-mono font-medium whitespace-nowrap transition-all cursor-pointer ${
                   isActive
                     ? 'bg-blue-600 text-white shadow-xs'
                     : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
                 }`}
               >
                 <FileCode className="w-3.5 h-3.5" />
-                <span>{file.filename}</span>
+                <span>{file.path}</span>
               </button>
             );
           })}
@@ -115,17 +148,17 @@ export const FlutterCodeInspector: React.FC<FlutterCodeInspectorProps> = ({
 
           <div className="flex items-center gap-2 shrink-0">
             <button
-              onClick={handleDownloadAll}
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-medium transition-colors"
-              title="تنزيل الملف"
+              onClick={handleDownloadSingleFile}
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-medium transition-colors cursor-pointer"
+              title="تنزيل هذا الملف"
             >
               <Download className="w-3.5 h-3.5" />
-              <span>تحميل</span>
+              <span>تنزيل الملف</span>
             </button>
 
             <button
               onClick={handleCopy}
-              className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold transition-colors shadow-xs"
+              className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold transition-colors shadow-xs cursor-pointer"
             >
               {copied ? (
                 <>
@@ -143,7 +176,10 @@ export const FlutterCodeInspector: React.FC<FlutterCodeInspectorProps> = ({
         </div>
 
         {/* Code Content Area */}
-        <div className="flex-1 overflow-auto p-4 bg-slate-950 font-mono text-xs text-slate-200 leading-relaxed text-left dir-ltr selection:bg-blue-600 selection:text-white">
+        <div
+          dir="ltr"
+          className="flex-1 overflow-auto p-4 bg-slate-950 font-mono text-xs text-slate-200 leading-relaxed text-left selection:bg-blue-600 selection:text-white"
+        >
           <pre className="m-0 font-mono">
             <code>{currentFile.content}</code>
           </pre>
@@ -156,7 +192,7 @@ export const FlutterCodeInspector: React.FC<FlutterCodeInspectorProps> = ({
             <span>
               لتشغيل المشروع محلياً:{' '}
               <code className="bg-slate-800 px-1.5 py-0.5 rounded text-slate-200 font-mono">
-                flutter create future_engineer && flutter pub get && flutter run
+                flutter create . --project-name future_engineer && flutter pub get && flutter run
               </code>
             </span>
           </div>

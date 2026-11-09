@@ -1,18 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { soundService } from '../services/soundService';
+import { downloadFlutterProjectZip } from '../data/flutterCodeSnippets';
 import {
   MapPin,
   BookOpen,
   Gamepad2,
   Award,
   Code2,
-  Smartphone,
   Maximize2,
   Minimize2,
   Wifi,
   Battery,
   Signal,
+  FolderArchive,
 } from 'lucide-react';
 
 interface FlutterMobileFrameProps {
@@ -56,8 +57,7 @@ export const FlutterMobileFrame: React.FC<FlutterMobileFrameProps> = ({ children
       {/* Top Utility Bar on Desktop */}
       <div className="w-full max-w-[430px] hidden sm:flex items-center justify-between pb-3 px-2 text-xs font-semibold text-slate-300">
         <div className="flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-          <span className="font-bold text-white">Flutter Mobile Engine</span>
+          <span className="font-bold text-white">Flutter Project (lib/ + pubspec.yaml)</span>
         </div>
 
         <div className="flex items-center gap-1.5">
@@ -83,6 +83,19 @@ export const FlutterMobileFrame: React.FC<FlutterMobileFrameProps> = ({ children
             )}
           </button>
 
+          {/* Download Flutter ZIP directly */}
+          <button
+            onClick={() => {
+              soundService.playCelebration();
+              downloadFlutterProjectZip();
+            }}
+            className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white transition-colors cursor-pointer text-[11px] font-bold shadow-xs"
+            title="تحميل مشروع Flutter كامل بصيغة ZIP"
+          >
+            <FolderArchive className="w-3.5 h-3.5" />
+            <span>تحميل Flutter ZIP</span>
+          </button>
+
           {/* Open Flutter Code */}
           <button
             onClick={() => {
@@ -92,7 +105,7 @@ export const FlutterMobileFrame: React.FC<FlutterMobileFrameProps> = ({ children
             className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-blue-600 hover:bg-blue-500 text-white transition-colors cursor-pointer text-[11px] font-bold shadow-xs"
           >
             <Code2 className="w-3.5 h-3.5" />
-            <span>كود فلاتر</span>
+            <span>ملفات Dart</span>
           </button>
         </div>
       </div>
@@ -139,7 +152,7 @@ export const FlutterMobileFrame: React.FC<FlutterMobileFrameProps> = ({ children
                 soundService.playTap();
                 navigateTo('map');
               }}
-              className={`flex flex-col items-center justify-center gap-0.5 py-1 rounded-xl transition-all ${
+              className={`flex flex-col items-center justify-center gap-0.5 py-1 rounded-xl transition-all cursor-pointer ${
                 currentScreen === 'map'
                   ? 'text-blue-600 font-black'
                   : 'text-slate-400 hover:text-slate-600 font-semibold'
@@ -161,7 +174,7 @@ export const FlutterMobileFrame: React.FC<FlutterMobileFrameProps> = ({ children
                 soundService.playTap();
                 navigateTo('station_cards', selectedStationId);
               }}
-              className={`flex flex-col items-center justify-center gap-0.5 py-1 rounded-xl transition-all ${
+              className={`flex flex-col items-center justify-center gap-0.5 py-1 rounded-xl transition-all cursor-pointer ${
                 currentScreen === 'station_cards' || currentScreen === 'station_intro'
                   ? 'text-blue-600 font-black'
                   : 'text-slate-400 hover:text-slate-600 font-semibold'
@@ -185,7 +198,7 @@ export const FlutterMobileFrame: React.FC<FlutterMobileFrameProps> = ({ children
                 soundService.playTap();
                 navigateTo('station_activity', selectedStationId);
               }}
-              className={`flex flex-col items-center justify-center gap-0.5 py-1 rounded-xl transition-all ${
+              className={`flex flex-col items-center justify-center gap-0.5 py-1 rounded-xl transition-all cursor-pointer ${
                 currentScreen === 'station_activity' || currentScreen === 'station_done'
                   ? 'text-blue-600 font-black'
                   : 'text-slate-400 hover:text-slate-600 font-semibold'
@@ -209,7 +222,7 @@ export const FlutterMobileFrame: React.FC<FlutterMobileFrameProps> = ({ children
                 soundService.playStar();
                 navigateTo('certificate');
               }}
-              className={`flex flex-col items-center justify-center gap-0.5 py-1 rounded-xl transition-all ${
+              className={`flex flex-col items-center justify-center gap-0.5 py-1 rounded-xl transition-all cursor-pointer ${
                 currentScreen === 'certificate'
                   ? 'text-amber-600 font-black'
                   : 'text-slate-400 hover:text-slate-600 font-semibold'
@@ -231,7 +244,7 @@ export const FlutterMobileFrame: React.FC<FlutterMobileFrameProps> = ({ children
                 soundService.playTap();
                 setFlutterInspectorOpen(true);
               }}
-              className="flex flex-col items-center justify-center gap-0.5 py-1 rounded-xl text-slate-400 hover:text-blue-600 font-semibold transition-all"
+              className="flex flex-col items-center justify-center gap-0.5 py-1 rounded-xl text-slate-400 hover:text-blue-600 font-semibold transition-all cursor-pointer"
             >
               <div className="p-1 rounded-full">
                 <Code2 className="w-4 h-4 text-cyan-600" />
