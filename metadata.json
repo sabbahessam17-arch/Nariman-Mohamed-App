@@ -1,0 +1,6 @@
+{
+  "name": "Future Engineer - Flutter Mobile App",
+  "description": "تطبيق مهندس المستقبل التفاعلي للهواتف الذكية مع تجربة Flutter Material 3 وكود Dart كامل.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
